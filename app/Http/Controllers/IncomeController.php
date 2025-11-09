@@ -22,9 +22,12 @@ class IncomeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'source' => 'required',
-            'amount' => 'required|numeric',
-            'description' => 'nullable'
+            'source' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0|max:9999999999999.99',
+            'description' => 'nullable|string|max:500',
+        ], [
+            'amount.max' => 'Jumlah terlalu besar. Nilai maksimal adalah 9.999.999.999.999,99.',
+            'amount.numeric' => 'Kolom amount harus berupa angka.',
         ]);
 
         Income::create([
@@ -34,26 +37,37 @@ class IncomeController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect()->route('incomes.index')->with('success', 'Data pemasukan ditambahkan');
+        return redirect()->route('incomes.index')->with('success', 'Data pemasukan berhasil ditambahkan.');
     }
 
-    // Hanya SATU method edit
     public function edit(Income $income)
     {
-        // kalau belum pakai policy, hapus dulu baris authorize
-        // $this->authorize('update', $income);
         return view('incomes.edit', compact('income'));
     }
 
     public function update(Request $request, Income $income)
     {
-        $income->update($request->all());
-        return redirect()->route('incomes.index')->with('success', 'Data pemasukan diperbarui');
+        $request->validate([
+            'source' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0|max:9999999999999.99',
+            'description' => 'nullable|string|max:500',
+        ], [
+            'amount.max' => 'Jumlah terlalu besar. Nilai maksimal adalah 9.999.999.999.999,99.',
+            'amount.numeric' => 'Kolom amount harus berupa angka.',
+        ]);
+
+        $income->update([
+            'source' => $request->source,
+            'amount' => $request->amount,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->route('incomes.index')->with('success', 'Data pemasukan berhasil diperbarui.');
     }
 
     public function destroy(Income $income)
     {
         $income->delete();
-        return redirect()->route('incomes.index')->with('success', 'Data dihapus');
+        return redirect()->route('incomes.index')->with('success', 'Data pemasukan berhasil dihapus.');
     }
 }
