@@ -25,9 +25,12 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'category' => 'required',
-            'amount' => 'required|numeric',
-            'description' => 'nullable'
+            'category' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0|max:9999999999999.99',
+            'description' => 'nullable|string|max:500',
+        ], [
+            'amount.max' => 'Jumlah terlalu besar. Nilai maksimal adalah 9.999.999.999.999,99.',
+            'amount.numeric' => 'Kolom jumlah harus berupa angka.',
         ]);
 
         Expense::create([
